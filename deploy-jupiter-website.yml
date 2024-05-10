@@ -1,54 +1,55 @@
 ---
-
+#descriptive value of the project
 - name: deploy jupiter website
-  hosts: 
-  become: 
-  become_user: 
+  hosts: all  # all server 
+  become: yes   # alow ansible to change root user 
+  become_user: root
 
   tasks:
-    - name: update ec2 instance
-      yum:
-        name: 
-        state: 
-        update_cache: 
+    - name: update ec2 instance #name of the task 
+      ansible.builtin.yum:
+        name: '*'
+        state: latest
+        update_cache: yes
 
-    - name: install apache server
-      yum:
-        name: 
-        state: 
+    - name: Install the latest version of Apache
+      ansible.builtin.yum:
+        name: httpd
+        state: latest
 
     - name: change directory to the html directory
-      shell: 
+      shell: cd /var/www/html      # jupiter-main/* to cd /var/www/html
 
     - name: download web files from github
-      get_url:
-        url: 
-        dest: 
+      get_url: 
+       # url: https://github.com/Stephanthedevops/jupiter.git    if it is .zip file 
+        url: httpd://github.com/azeezsalu/jupiter/archive/ref/heads/main.zip 
+        dest: cd /var/www/html/ # we will download the web files into our html directory 
 
     - name: unzip the zip folder
       ansible.builtin.unarchive:
-        src: 
-        dest: 
-        remote_src: 
+        src: /var/www/html/jupiter-main.zip
+        dest: /var/www/html/
+        remote_src: yes # Instance is remote so 
 
     - name: copy webfiles from the jupiter-main directory to the html directory
       copy: 
-        src: 
-        dest: 
+        src: /var/www/html/jupiter-main/
+        dest: /var/www/html/
         remote_src: 
 
     - name: remove the jupiter-main directory
       file: 
-        path: 
-        state: 
+        path: /var/www/html/jupiter-main # make shure you don't enter the forwars slash /
+        state: absent #to delete 
 
     - name: remove the jupiter-main.zip folder
       file: 
-        path: 
-        state: 
+        path: /var/www/html/jupiter-main.zip
+        state: absent
 
     - name: start apache server, if not started
       ansible.builtin.service:
-        enabled: 
-        name: 
-        state: 
+        enabled: yes
+        name: httpd
+        state: started
